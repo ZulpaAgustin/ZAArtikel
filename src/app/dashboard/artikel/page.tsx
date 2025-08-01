@@ -5,10 +5,17 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 
+type Article = {
+  id: string
+  title: string
+  content: string
+  imageUrl?: string
+}
+
 export default function ArtikelPage() {
   const { data: session, status } = useSession({ required: true })
   const router = useRouter()
-  const [articles, setArticles] = useState([])
+  const [articles, setArticles] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -64,7 +71,7 @@ export default function ArtikelPage() {
         <p className="text-gray-600">Belum ada artikel ditulis.</p>
       ) : (
         <ul className="space-y-6">
-          {articles.map((article: any) => (
+          {articles.map((article) => (
             <li
               key={article.id}
               className="bg-white rounded-lg shadow p-4 flex flex-col md:flex-row gap-4"
