@@ -4,17 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const { id } = props.params;
-
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const article = await prisma.article.findUnique({
-    where: { id },
+    where: { id: params.id },
   });
 
   return {
@@ -22,13 +14,11 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   };
 }
 
-export default async function Page(props: PageProps) {
-  const { id } = props.params;
-
+export default async function Page({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
 
   const article = await prisma.article.findUnique({
-    where: { id },
+    where: { id: params.id },
   });
 
   if (!article) return notFound();
