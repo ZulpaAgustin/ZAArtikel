@@ -101,7 +101,7 @@ export default async function ArtikelDetail({
               return (
                 <li className="flex gap-3" key={recent.id}>
                   <Image
-                    src={recent.imageUrl || '/images/default-thumbnail.jpg'}
+                    src={recent.imageUrl || '/default-thumbnail.jpg'}
                     alt={recent.title}
                     width={100}
                     height={80}
