@@ -4,17 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-type PageProps = {
+interface PageProps {
   params: {
     id: string;
   };
-};
+}
 
-export async function generateMetadata(
-  { params }: PageProps
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const { id } = props.params;
+
   const article = await prisma.article.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   return {
@@ -22,11 +22,13 @@ export async function generateMetadata(
   };
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page(props: PageProps) {
+  const { id } = props.params;
+
   const session = await getServerSession(authOptions);
 
   const article = await prisma.article.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!article) return notFound();
