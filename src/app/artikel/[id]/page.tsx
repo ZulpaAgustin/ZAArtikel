@@ -2,7 +2,10 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata(
+  props: Promise<{ params: { id: string } }>
+) {
+  const { params } = await props
   const article = await prisma.article.findUnique({ where: { id: params.id } })
   if (!article) return {}
   return {
@@ -11,7 +14,11 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   }
 }
 
-export default async function ArtikelDetail({ params }: { params: { id: string } }) {
+export default async function ArtikelDetail(
+  props: Promise<{ params: { id: string } }>
+) {
+  const { params } = await props
+
   const article = await prisma.article.findUnique({
     where: { id: params.id },
     include: { author: true },
@@ -20,20 +27,24 @@ export default async function ArtikelDetail({ params }: { params: { id: string }
   if (!article) return notFound()
 
   const recentArticles = await prisma.article.findMany({
-    where: { id: { not: article.id } }, // Kecuali artikel ini
+    where: { id: { not: article.id } },
     orderBy: { createdAt: 'desc' },
     take: 3,
   })
 
   const date = new Date(article.createdAt).toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   })
 
   return (
     <main className="container mx-auto p-6 grid lg:grid-cols-[1fr_300px] gap-10">
       <article className="bg-white rounded-xl shadow p-8">
         <header className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{article.title}</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            {article.title}
+          </h1>
           <div className="flex items-center gap-4 mb-6">
             <Image
               src={article.author?.image || '/images/default-avatar.jpg'}
@@ -43,7 +54,9 @@ export default async function ArtikelDetail({ params }: { params: { id: string }
               className="rounded-full object-cover w-[50px] h-[50px]"
             />
             <div>
-              <h4 className="text-sm font-medium">{article.author?.name || 'Penulis'}</h4>
+              <h4 className="text-sm font-medium">
+                {article.author?.name || 'Penulis'}
+              </h4>
               <p className="text-gray-500 text-xs">{date}</p>
             </div>
           </div>
@@ -67,12 +80,19 @@ export default async function ArtikelDetail({ params }: { params: { id: string }
 
       <aside className="space-y-6">
         <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-lg font-bold mb-4 border-b pb-2 border-pink-500">Artikel Terbaru</h3>
+          <h3 className="text-lg font-bold mb-4 border-b pb-2 border-pink-500">
+            Artikel Terbaru
+          </h3>
           <ul className="space-y-4">
             {recentArticles.map((recent) => {
-              const recentDate = new Date(recent.createdAt).toLocaleDateString('id-ID', {
-                day: 'numeric', month: 'long', year: 'numeric',
-              })
+              const recentDate = new Date(recent.createdAt).toLocaleDateString(
+                'id-ID',
+                {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                }
+              )
 
               return (
                 <li className="flex gap-3" key={recent.id}>
@@ -85,7 +105,9 @@ export default async function ArtikelDetail({ params }: { params: { id: string }
                   />
                   <div>
                     <a href={`/artikel/${recent.id}`}>
-                      <h4 className="text-sm font-semibold leading-tight hover:text-pink-600">{recent.title}</h4>
+                      <h4 className="text-sm font-semibold leading-tight hover:text-pink-600">
+                        {recent.title}
+                      </h4>
                     </a>
                     <p className="text-xs text-gray-500">{recentDate}</p>
                   </div>
