@@ -3,13 +3,16 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 
-function getIdFromRequest(req: NextRequest) {
-  const segments = req.nextUrl.pathname.split('/')
-  return segments[segments.length - 1]
+async function getIdFromReq(req: NextRequest): Promise<string | null> {
+  const pathSegments = req.nextUrl.pathname.split('/')
+  return pathSegments.pop() || null
 }
 
 export async function GET(req: NextRequest) {
-  const id = getIdFromRequest(req)
+  const id = await getIdFromReq(req)
+  if (!id) {
+    return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+  }
 
   const article = await prisma.article.findUnique({
     where: { id },
@@ -23,9 +26,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-  const id = getIdFromRequest(req)
-  const session = await getServerSession(authOptions)
+  const id = await getIdFromReq(req)
+  if (!id) {
+    return NextResponse.json({ error: 'Invalid ID' }, { status: 400 })
+  }
 
+  const session = await getServerSession(authOptions)
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
