@@ -55,7 +55,6 @@ export default function HomePage() {
     return () => clearTimeout(delay);
   }, [search]);
 
-  // Fungsi pencarian artikel
   const handleSearchSubmit = async (keyword?: string) => {
     const query = keyword ?? search;
     setSearch(query);
@@ -72,14 +71,13 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen flex bg-gray-50">
-
       <LeftNavbar />
 
       <div className="flex-1 ml-16">
         <nav className="w-full bg-white shadow sticky top-0 z-40">
-          <div className="max-w-6xl mx-auto  py-4 flex items-center justify-between">
+          <div className="max-w-6xl mx-auto py-4 flex items-center justify-between">
             <h4 className="px-5 text-pink-600 font-semibold">ZAArtikel</h4>
-           
+
             <div className="flex-1 relative" id="search">
               <input
                 type="text"
@@ -116,7 +114,6 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* Login */}
             <div className="ml-4">
               <Link href="/login">
                 <span className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition">
@@ -136,8 +133,12 @@ export default function HomePage() {
           {articles.length > 0 ? (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {articles.map((article) => (
-                <div key={article.id} className="block">
-                  <div className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition">
+                <Link
+                  key={article.id}
+                  href={`/artikel/${article.id}`}
+                  className="block"
+                >
+                  <div className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition cursor-pointer">
                     {article.imageUrl ? (
                       <img
                         src={article.imageUrl}
@@ -162,7 +163,7 @@ export default function HomePage() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

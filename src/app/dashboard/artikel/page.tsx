@@ -6,25 +6,34 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 
 export default function ArtikelPage() {
-  const { data: session, status } = useSession()
+  const { data: session, status } = useSession({ required: true })
   const router = useRouter()
   const [articles, setArticles] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login")
-    }
-
-    if (status === "authenticated") {
-      const fetchArticles = async () => {
+    const fetchArticles = async () => {
+      setLoading(true)
+      try {
         const res = await fetch("/api/my-articles")
-        const data = await res.json()
-        setArticles(data)
-      }
 
-      fetchArticles()
+        if (!res.ok) {
+          console.error("Gagal fetch artikel:", res.status)
+          setArticles([])
+        } else {
+          const data = await res.json()
+          setArticles(data)
+        }
+      } catch (err) {
+        console.error("Terjadi error saat mengambil artikel:", err)
+        setArticles([])
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [status, router])
+
+    fetchArticles()
+  }, [])
 
   const handleDelete = async (id: string) => {
     const confirmDelete = confirm("Yakin ingin menghapus artikel ini?")
@@ -37,6 +46,14 @@ export default function ArtikelPage() {
     if (res.ok) {
       setArticles((prev) => prev.filter((a) => a.id !== id))
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <p className="text-gray-600">Memuat artikel...</p>
+      </div>
+    )
   }
 
   return (
