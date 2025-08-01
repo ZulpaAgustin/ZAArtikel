@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/authOptions' // perbaiki path-nya
+import { authOptions } from '@/lib/authOptions'
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+function getIdFromRequest(req: NextRequest) {
+  const segments = req.nextUrl.pathname.split('/')
+  return segments[segments.length - 1]
+}
+
+export async function GET(req: NextRequest) {
+  const id = getIdFromRequest(req)
+
   const article = await prisma.article.findUnique({
-    where: { id: params.id },
+    where: { id },
   })
 
   if (!article) {
@@ -18,10 +22,8 @@ export async function GET(
   return NextResponse.json(article)
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest) {
+  const id = getIdFromRequest(req)
   const session = await getServerSession(authOptions)
 
   if (!session?.user?.email) {
@@ -32,7 +34,7 @@ export async function PUT(
   const { title, content, imageUrl } = body
 
   const article = await prisma.article.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { author: true },
   })
 
@@ -41,7 +43,7 @@ export async function PUT(
   }
 
   const updated = await prisma.article.update({
-    where: { id: params.id },
+    where: { id },
     data: { title, content, imageUrl },
   })
 
