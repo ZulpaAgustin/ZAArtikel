@@ -5,6 +5,8 @@ import Link from "next/link";
 import Carousel from "@/components/Carousel";
 import { Article } from "@prisma/client";
 import LeftNavbar from "@/components/LeftNavbar";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 function formatDate(date: string | Date) {
   return new Date(date).toLocaleDateString("id-ID", {
@@ -20,6 +22,16 @@ export default function HomePage() {
   const [results, setResults] = useState<Article[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status]);
 
   useEffect(() => {
     fetchArticles();
@@ -55,7 +67,6 @@ export default function HomePage() {
     return () => clearTimeout(delay);
   }, [search]);
 
-  // Fungsi pencarian artikel
   const handleSearchSubmit = async (keyword?: string) => {
     const query = keyword ?? search;
     setSearch(query);
@@ -70,6 +81,10 @@ export default function HomePage() {
     }
   };
 
+  if (status === "loading") {
+    return <div className="min-h-screen flex items-center justify-center">Memuat...</div>;
+  }
+
   return (
     <main className="min-h-screen flex bg-gray-50">
 
@@ -77,9 +92,9 @@ export default function HomePage() {
 
       <div className="flex-1 ml-16">
         <nav className="w-full bg-white shadow sticky top-0 z-40">
-          <div className="max-w-6xl mx-auto  py-4 flex items-center justify-between">
-            <h4 className="px-5 text-pink-600 font-semibold">ZAArtikel</h4>
-           
+          <div className="max-w-6xl mx-auto py-4 flex items-center justify-between">
+            <h4 className="px-5 font-semibold text-pink-600">ZAArtikel</h4>
+
             <div className="flex-1 relative" id="search">
               <input
                 type="text"
@@ -116,13 +131,8 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* Login */}
-            <div className="ml-4">
-              <Link href="/login">
-                <span className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 transition">
-                  Login
-                </span>
-              </Link>
+            <div className="ml-4 px-4 py-2 text-pink-700 font-semibold">
+              {session?.user?.name || session?.user?.email}
             </div>
           </div>
         </nav>
