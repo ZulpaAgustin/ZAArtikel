@@ -1,14 +1,16 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
-import { prisma } from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
-export async function generateMetadata(
-  props: { params: { id: string } }
-): Promise<Metadata> {
+type Props = {
+  params: { id: string };
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await prisma.article.findUnique({
-    where: { id: props.params.id },
+    where: { id: params.id },
   });
 
   return {
@@ -16,13 +18,11 @@ export async function generateMetadata(
   };
 }
 
-export default async function Page(
-  props: { params: { id: string } }
-) {
+export default async function Page({ params }: Props) {
   const session = await getServerSession(authOptions);
 
   const article = await prisma.article.findUnique({
-    where: { id: props.params.id },
+    where: { id: params.id },
   });
 
   if (!article) return notFound();
