@@ -3,12 +3,15 @@ import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest) {
+  const id = req.nextUrl.pathname.split("/").pop()
+
+  if (!id) {
+    return NextResponse.json({ error: "ID tidak ditemukan" }, { status: 400 })
+  }
+
   const article = await prisma.article.findUnique({
-    where: { id: params.id },
+    where: { id },
   })
 
   if (!article) {
@@ -18,10 +21,13 @@ export async function GET(
   return NextResponse.json(article)
 }
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest) {
+  const id = req.nextUrl.pathname.split("/").pop()
+
+  if (!id) {
+    return NextResponse.json({ error: "ID tidak ditemukan" }, { status: 400 })
+  }
+
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -31,7 +37,7 @@ export async function PUT(
   const { title, content, imageUrl } = body
 
   const article = await prisma.article.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { author: true },
   })
 
@@ -40,7 +46,7 @@ export async function PUT(
   }
 
   const updated = await prisma.article.update({
-    where: { id: params.id },
+    where: { id },
     data: { title, content, imageUrl },
   })
 
