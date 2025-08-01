@@ -2,11 +2,13 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 
-export async function generateMetadata(
-  props: Promise<{ params: { id: string } }>
-) {
-  const { params } = await props
-  const article = await prisma.article.findUnique({ where: { id: params.id } })
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const article = await prisma.article.findUnique({ where: { id } })
   if (!article) return {}
   return {
     title: article.title,
@@ -14,13 +16,15 @@ export async function generateMetadata(
   }
 }
 
-export default async function ArtikelDetail(
-  props: Promise<{ params: { id: string } }>
-) {
-  const { params } = await props
+export default async function ArtikelDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
 
   const article = await prisma.article.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { author: true },
   })
 
